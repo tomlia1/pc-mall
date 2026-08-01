@@ -1,0 +1,9 @@
+target/
+*.log
+.idea/
+.vscode/
+.env*
+!.env.example
+frontend/node_modules/
+frontend/dist/
+.agents/

@@ -1,0 +1,34 @@
+spring:
+  application:
+    name: pc-mall
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/pc_mall?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai}
+    username: ${SPRING_DATASOURCE_USERNAME:pcmall_app}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+server:
+  error:
+    include-message: never
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+app:
+  jwt:
+    secret-base64: ${JWT_SECRET_BASE64}
+    expiration-seconds: 7200
+  deepseek:
+    api-key: ${DEEPSEEK_API_KEY:}
+    base-url: ${DEEPSEEK_BASE_URL:https://api.deepseek.com/chat/completions}
+    model: ${DEEPSEEK_MODEL:deepseek-chat}
+    timeout-seconds: 15
