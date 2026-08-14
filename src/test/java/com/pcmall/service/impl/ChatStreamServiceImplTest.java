@@ -46,6 +46,18 @@ class ChatStreamServiceImplTest {
     }
 
     @Test
+    void invokesCompletionCallbackAfterTheStreamEnds() throws Exception {
+        ChatService chatService = mock(ChatService.class);
+        when(chatService.chat(any())).thenReturn(new ChatResult("推荐这台电脑", List.of()));
+        CountDownLatch completed = new CountDownLatch(1);
+        service = new ChatStreamServiceImpl(chatService, new ObjectMapper());
+
+        service.stream(new ChatRequest("550e8400-e29b-41d4-a716-446655440000", "预算五千"), completed::countDown);
+
+        assertTrue(completed.await(2, TimeUnit.SECONDS));
+    }
+
+    @Test
     void splitsTextByCodePointsWithoutBreakingChineseCharacters() {
         assertEquals(List.of("推荐你", "😀这台", "电脑"), ChatStreamServiceImpl.splitText("推荐你😀这台电脑", 3));
     }

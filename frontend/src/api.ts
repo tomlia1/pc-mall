@@ -6,6 +6,8 @@ interface ApiResult<T> {
   data: T
 }
 
+const SERVICE_UNAVAILABLE_MESSAGE = '服务暂时不可用，请稍后重试'
+
 export interface ProductSearchParams {
   page?: number
   pageSize?: number
@@ -24,9 +26,23 @@ export interface ProductCatalogPage {
 }
 
 async function readResult<T>(response: Response): Promise<T> {
-  const result = await response.json() as ApiResult<T>
+  const body = await response.text()
+  let result: ApiResult<T>
+  try {
+    result = JSON.parse(body) as ApiResult<T>
+  } catch {
+    throw new Error(SERVICE_UNAVAILABLE_MESSAGE)
+  }
   if (!response.ok || result.code >= 400) throw new Error(result.message || '请求失败，请稍后重试')
   return result.data
+}
+
+async function request(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
+  try {
+    return await fetch(input, init)
+  } catch {
+    throw new Error(SERVICE_UNAVAILABLE_MESSAGE)
+  }
 }
 
 export async function fetchProducts(params: ProductSearchParams = {}): Promise<ProductCatalogPage> {
@@ -34,7 +50,7 @@ export async function fetchProducts(params: ProductSearchParams = {}): Promise<P
   Object.entries(params).forEach(([key, value]) => {
     if (value !== undefined && value !== '') query.set(key, String(value))
   })
-  const response = await fetch(`/api/v1/products?${query.toString()}`)
+  const response = await request(`/api/v1/products?${query.toString()}`)
   const products = await readResult<Product[]>(response)
   const total = Number(response.headers.get('X-Total-Count'))
   const totalPages = Number(response.headers.get('X-Total-Pages'))
@@ -46,21 +62,19 @@ export async function fetchProducts(params: ProductSearchParams = {}): Promise<P
 }
 
 export async function fetchProduct(id: number): Promise<Product> {
-  return readResult<Product>(await fetch(`/api/v1/products/${id}`))
+  return readResult<Product>(await request(`/api/v1/products/${id}`))
 }
 
 export async function submitLead(payload: LeadPayload): Promise<void> {
-  const response = await fetch('/api/v1/leads', {
+  await readResult<unknown>(await request('/api/v1/leads', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload)
-  })
-  const result = await response.json() as ApiResult<unknown>
-  if (!response.ok || result.code >= 400) throw new Error(result.message || '提交失败，请稍后再试')
+  }))
 }
 
 export async function checkBuild(payload: BuildCheckRequest): Promise<BuildCheckResult> {
-  return readResult<BuildCheckResult>(await fetch('/api/v1/builds/check', {
+  return readResult<BuildCheckResult>(await request('/api/v1/builds/check', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload)
@@ -68,7 +82,7 @@ export async function checkBuild(payload: BuildCheckRequest): Promise<BuildCheck
 }
 
 export async function streamBuildAnalysis(payload: BuildCheckRequest, signal: AbortSignal): Promise<Response> {
-  return fetch('/api/v1/builds/analyze/stream', {
+  return request('/api/v1/builds/analyze/stream', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Accept: 'text/event-stream' },
     body: JSON.stringify(payload),

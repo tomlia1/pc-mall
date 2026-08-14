@@ -35,20 +35,30 @@ public class ChatStreamServiceImpl implements ChatStreamService {
 
     @Override
     public SseEmitter stream(ChatRequest request) {
+        return stream(request, () -> { });
+    }
+
+    @Override
+    public SseEmitter stream(ChatRequest request, Runnable completionCallback) {
         SseEmitter emitter = new SseEmitter(STREAM_TIMEOUT_MILLIS);
         AtomicReference<Future<?>> taskReference = new AtomicReference<>();
         AtomicBoolean finished = new AtomicBoolean(false);
-        Runnable cancel = () -> cancelIfPending(finished, taskReference.get());
-        emitter.onCompletion(cancel);
+        AtomicBoolean completionNotified = new AtomicBoolean(false);
+        Runnable complete = () -> {
+            cancelIfPending(finished, taskReference.get());
+            if (completionNotified.compareAndSet(false, true)) completionCallback.run();
+        };
+        emitter.onCompletion(complete);
         emitter.onTimeout(() -> {
-            cancel.run();
+            complete.run();
             emitter.complete();
         });
-        taskReference.set(executor.submit(() -> produceEvents(request, emitter, finished)));
+        emitter.onError(error -> complete.run());
+        taskReference.set(executor.submit(() -> produceEvents(request, emitter, finished, complete)));
         return emitter;
     }
 
-    private void produceEvents(ChatRequest request, SseEmitter emitter, AtomicBoolean finished) {
+    private void produceEvents(ChatRequest request, SseEmitter emitter, AtomicBoolean finished, Runnable complete) {
         try {
             ChatResult result = chatService.chat(request);
             if (result.budgetResult() != null) send(emitter, "budget_result", result.budgetResult());
@@ -64,6 +74,9 @@ public class ChatStreamServiceImpl implements ChatStreamService {
             sendError(emitter, exception.getMessage());
         } catch (Exception ignored) {
             sendError(emitter, "推荐服务暂时不可用，请稍后再试");
+        } finally {
+            finished.set(true);
+            complete.run();
         }
     }
 
