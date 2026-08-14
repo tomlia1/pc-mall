@@ -26,8 +26,7 @@ services:
       JWT_SECRET_BASE64: ${JWT_SECRET_BASE64}
       ADMIN_INITIAL_USERNAME: ${ADMIN_INITIAL_USERNAME:-admin}
       ADMIN_INITIAL_PASSWORD: ${ADMIN_INITIAL_PASSWORD}
-    ports:
-      - "8080:8080"
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
     depends_on:
       mysql:
         condition: service_healthy
@@ -38,11 +37,29 @@ services:
         limits:
           memory: 1024M
     healthcheck:
-      test: ["CMD-SHELL", "curl --fail --silent http://localhost:8080/actuator/health || exit 1"]
+      test: ["CMD-SHELL", "curl --fail --silent http://localhost:8081/actuator/health || exit 1"]
       interval: 15s
       timeout: 5s
       retries: 5
       start_period: 45s
+
+  web:
+    build:
+      context: .
+      dockerfile: deploy/web.Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      app:
+        condition: service_healthy
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1/ >/dev/null 2>&1 || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
 
 networks:
   internal:

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520" role="img" aria-label="中性迷你主机展示图">
+  <rect width="800" height="520" fill="#eef1f3"/>
+  <ellipse cx="400" cy="418" rx="185" ry="25" fill="#cbd3da"/>
+  <rect x="238" y="152" width="324" height="220" rx="30" fill="#273b4d"/>
+  <rect x="259" y="174" width="282" height="176" rx="19" fill="#385267"/>
+  <rect x="280" y="202" width="76" height="11" rx="5" fill="#91a9ba"/>
+  <rect x="280" y="232" width="148" height="9" rx="4" fill="#6f899d"/>
+  <circle cx="491" cy="207" r="15" fill="#a3d0ec"/>
+  <circle cx="491" cy="207" r="7" fill="#29495f"/>
+  <g fill="#93aaba"><circle cx="298" cy="286" r="4"/><circle cx="320" cy="286" r="4"/><circle cx="342" cy="286" r="4"/><circle cx="364" cy="286" r="4"/><circle cx="386" cy="286" r="4"/><circle cx="408" cy="286" r="4"/></g>
+  <path d="M274 372h52l-10 17h-48zM474 372h52l6 17h-48z" fill="#1c3042"/>
+</svg>

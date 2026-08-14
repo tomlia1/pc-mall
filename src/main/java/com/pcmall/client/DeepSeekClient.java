@@ -5,4 +5,5 @@ import java.util.List;
 
 public interface DeepSeekClient {
     DeepSeekCompletion complete(List<ObjectNode> messages);
+    DeepSeekCompletion completePlain(List<ObjectNode> messages);
 }

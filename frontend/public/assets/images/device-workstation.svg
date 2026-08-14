@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520" role="img" aria-label="中性移动工作站展示图">
+  <rect width="800" height="520" fill="#eceff1"/>
+  <ellipse cx="400" cy="431" rx="270" ry="24" fill="#c7d0d7"/>
+  <rect x="173" y="102" width="454" height="266" rx="12" fill="#314558"/>
+  <rect x="191" y="120" width="418" height="230" rx="5" fill="#c7d6df"/>
+  <path d="M220 314l74-105 79 68 62-104 124 141z" fill="#8daab9"/>
+  <path d="M245 149v169M318 149v169M391 149v169M464 149v169M537 149v169" stroke="#e5edf1" stroke-width="3" opacity=".7"/>
+  <path d="M78 380h644l54 48H24z" fill="#25394b"/>
+  <path d="M109 402h582l28 16H81z" fill="#617d90"/>
+  <path d="M315 396h170l20 19H295z" fill="#a4b8c5"/>
+  <circle cx="400" cy="374" r="5" fill="#80b8df"/>
+</svg>

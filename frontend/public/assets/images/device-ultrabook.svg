@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520" role="img" aria-label="中性轻薄笔记本展示图">
+  <rect width="800" height="520" fill="#eef1f3"/>
+  <ellipse cx="400" cy="425" rx="248" ry="22" fill="#cfd6dc"/>
+  <rect x="220" y="112" width="360" height="242" rx="18" fill="#627286"/>
+  <rect x="236" y="128" width="328" height="210" rx="9" fill="#dce5eb"/>
+  <path d="M156 365h488l54 48H102z" fill="#394b5f"/>
+  <path d="M328 383h144l17 16H311z" fill="#aebcc8"/>
+  <path d="M228 149c69-24 196-25 343 4v168H228z" fill="#d2dde5" opacity=".78"/>
+  <circle cx="400" cy="362" r="4" fill="#62a6e8"/>
+</svg>

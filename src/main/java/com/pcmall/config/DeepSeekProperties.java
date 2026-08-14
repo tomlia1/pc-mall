@@ -8,6 +8,8 @@ public class DeepSeekProperties {
     private String baseUrl;
     private String model;
     private int timeoutSeconds = 15;
+    private String proxyHost;
+    private int proxyPort;
     public String getApiKey() { return apiKey; }
     public void setApiKey(String apiKey) { this.apiKey = apiKey; }
     public String getBaseUrl() { return baseUrl; }
@@ -16,4 +18,8 @@ public class DeepSeekProperties {
     public void setModel(String model) { this.model = model; }
     public int getTimeoutSeconds() { return timeoutSeconds; }
     public void setTimeoutSeconds(int timeoutSeconds) { this.timeoutSeconds = timeoutSeconds; }
+    public String getProxyHost() { return proxyHost; }
+    public void setProxyHost(String proxyHost) { this.proxyHost = proxyHost; }
+    public int getProxyPort() { return proxyPort; }
+    public void setProxyPort(int proxyPort) { this.proxyPort = proxyPort; }
 }

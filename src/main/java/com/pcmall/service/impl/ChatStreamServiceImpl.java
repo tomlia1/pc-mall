@@ -51,6 +51,8 @@ public class ChatStreamServiceImpl implements ChatStreamService {
     private void produceEvents(ChatRequest request, SseEmitter emitter, AtomicBoolean finished) {
         try {
             ChatResult result = chatService.chat(request);
+            if (result.budgetResult() != null) send(emitter, "budget_result", result.budgetResult());
+            if (result.productSearchResult() != null) send(emitter, "product_search_result", result.productSearchResult());
             for (String part : splitText(result.reply(), 16)) send(emitter, "message", Map.of("text", part));
             for (Product product : result.products()) send(emitter, "product", product);
             send(emitter, "done", Map.of());

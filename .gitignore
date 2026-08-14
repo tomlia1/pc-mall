@@ -7,3 +7,4 @@ target/
 frontend/node_modules/
 frontend/dist/
 .agents/
+pc-mall-deploy.zip

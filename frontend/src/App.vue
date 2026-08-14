@@ -14,15 +14,10 @@ let abortController: AbortController | null = null
 let typingTimer: number | null = null
 let typingQueue = ''
 let pendingDone = false
+const currentSessionId = crypto.randomUUID()
 
 function sessionId(): string {
-  const key = 'pc-mall-chat-session-id'
-  let id = localStorage.getItem(key)
-  if (!id) {
-    id = crypto.randomUUID()
-    localStorage.setItem(key, id)
-  }
-  return id
+  return currentSessionId
 }
 
 function newMessage(role: ChatMessage['role'], content: string): ChatMessage {

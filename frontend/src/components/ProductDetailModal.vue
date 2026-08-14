@@ -1,12 +1,23 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import ProductImage from './ProductImage.vue'
-import type { Product } from '../types'
+import { isBuildSlot, type Product } from '../types'
 
 const props = defineProps<{ product: Product | null; loading: boolean }>()
-const emit = defineEmits<{ close: []; consult: [productId: number] }>()
+const emit = defineEmits<{ close: []; consult: [productId: number]; add: [product: Product] }>()
 
 const price = computed(() => props.product ? `¥${Number(props.product.price).toLocaleString('zh-CN')}` : '')
+const detailSpecs = computed(() => {
+  const product = props.product
+  if (!product) return []
+  if (product.productType !== 'LAPTOP') return product.tags ? [{ label: '核心规格', value: product.tags }] : []
+  return [
+    { label: '处理器', value: product.cpu || '未提供' },
+    { label: '显卡', value: product.gpu || '集成显卡' },
+    { label: '内存', value: product.memoryGb ? `${product.memoryGb}GB` : '未提供' },
+    { label: '存储', value: product.storageGb ? `${product.storageGb}GB` : '未提供' }
+  ]
+})
 </script>
 
 <template>
@@ -20,13 +31,11 @@ const price = computed(() => props.product ? `¥${Number(props.product.price).to
         <p class="detail-price">{{ price }}</p>
         <p v-if="loading" class="detail-loading">正在加载真实配置…</p>
         <dl v-else class="spec-list">
-          <div><dt>处理器</dt><dd>{{ product.cpu }}</dd></div>
-          <div><dt>显卡</dt><dd>{{ product.gpu || '集成显卡' }}</dd></div>
-          <div><dt>内存</dt><dd>{{ product.memoryGb }}GB</dd></div>
-          <div><dt>存储</dt><dd>{{ product.storageGb }}GB</dd></div>
-          <div v-if="product.tags"><dt>适用场景</dt><dd>{{ product.tags }}</dd></div>
+          <div v-for="spec in detailSpecs" :key="spec.label"><dt>{{ spec.label }}</dt><dd>{{ spec.value }}</dd></div>
+          <div v-if="product.productType === 'LAPTOP' && product.tags"><dt>适用场景</dt><dd>{{ product.tags }}</dd></div>
         </dl>
-        <button type="button" class="detail-consult" @click="emit('consult', product.id)">咨询 AI</button>
+        <button v-if="isBuildSlot(product.productType)" type="button" class="detail-consult" @click="emit('add', product)">加入装机单</button>
+        <button v-else type="button" class="detail-consult" @click="emit('consult', product.id)">咨询 AI</button>
       </div>
     </section>
   </div>

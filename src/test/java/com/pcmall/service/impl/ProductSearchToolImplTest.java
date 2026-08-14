@@ -8,21 +8,25 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class ProductSearchToolImplTest {
     @Test
-    void buildsActiveProductQueryFromBudgetCategoryAndTags() {
+    void buildsActiveTypedQueryFromBudgetCategoryAndTags() {
         ProductMapper mapper = mock(ProductMapper.class);
-        Product product = new Product(); product.setId(1L);
+        Product product = new Product();
+        product.setId(1L);
         when(mapper.selectList(any())).thenReturn(List.of(product));
         ProductSearchToolImpl tool = new ProductSearchToolImpl(mapper);
 
-        var result = tool.search(new ProductSearchCriteria(new BigDecimal("5500"), "办公/编程", List.of("轻薄", "办公")));
+        var result = tool.search(new ProductSearchCriteria(null, new BigDecimal("5500"), "LAPTOP", "办公/编程", null, List.of("轻薄", "办公")));
 
-        assertEquals(List.of(product), result);
+        assertEquals(List.of(product), result.products());
+        assertEquals("EXACT", result.matchType().name());
         verify(mapper).selectList(any());
     }
 }

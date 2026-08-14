@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520" role="img" aria-label="中性游戏笔记本展示图">
+  <rect width="800" height="520" fill="#e8edf1"/>
+  <ellipse cx="400" cy="430" rx="270" ry="24" fill="#c5ced7"/>
+  <path d="M190 118h420l28 242H162z" fill="#253b52"/>
+  <path d="M208 137h384l24 201H184z" fill="#102b43"/>
+  <path d="M237 167l110 116 54-72 152 99H237z" fill="#315d7f"/>
+  <path d="M237 167l110 116 54-72 152 99" fill="none" stroke="#7bb9e8" stroke-width="10" opacity=".82"/>
+  <path d="M104 368h592l64 54H40z" fill="#1c3045"/>
+  <path d="M122 396h556l22 14H100z" fill="#53718a"/>
+  <path d="M332 383h136l19 17H313z" fill="#8eb1ca"/>
+  <circle cx="400" cy="360" r="5" fill="#58b4ee"/>
+</svg>
