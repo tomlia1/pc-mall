@@ -34,13 +34,23 @@ public class BuildAnalysisStreamServiceImpl implements BuildAnalysisStreamServic
 
     @Override
     public SseEmitter stream(BuildCheckRequest request) {
+        return stream(request, () -> { });
+    }
+
+    @Override
+    public SseEmitter stream(BuildCheckRequest request, Runnable completionCallback) {
         SseEmitter emitter = new SseEmitter(STREAM_TIMEOUT_MILLIS);
         AtomicReference<Future<?>> taskReference = new AtomicReference<>();
         AtomicBoolean finished = new AtomicBoolean(false);
-        Runnable cancel = () -> { if (!finished.get() && taskReference.get() != null) taskReference.get().cancel(true); };
-        emitter.onCompletion(cancel);
-        emitter.onTimeout(() -> { cancel.run(); emitter.complete(); });
-        taskReference.set(executor.submit(() -> produceEvents(request, emitter, finished)));
+        AtomicBoolean completionNotified = new AtomicBoolean(false);
+        Runnable complete = () -> {
+            if (!finished.get() && taskReference.get() != null) taskReference.get().cancel(true);
+            if (completionNotified.compareAndSet(false, true)) completionCallback.run();
+        };
+        emitter.onCompletion(complete);
+        emitter.onTimeout(() -> { complete.run(); emitter.complete(); });
+        emitter.onError(error -> complete.run());
+        taskReference.set(executor.submit(() -> produceEvents(request, emitter, finished, complete)));
         return emitter;
     }
 
@@ -59,7 +69,7 @@ public class BuildAnalysisStreamServiceImpl implements BuildAnalysisStreamServic
         return events;
     }
 
-    private void produceEvents(BuildCheckRequest request, SseEmitter emitter, AtomicBoolean finished) {
+    private void produceEvents(BuildCheckRequest request, SseEmitter emitter, AtomicBoolean finished, Runnable complete) {
         try {
             BuildAnalysisResult result = buildAnalysisService.analyze(request);
             for (BuildAnalysisEvent event : events(result)) send(emitter, event.name(), event.data());
@@ -69,6 +79,9 @@ public class BuildAnalysisStreamServiceImpl implements BuildAnalysisStreamServic
             sendError(emitter, exception.getMessage());
         } catch (Exception exception) {
             sendError(emitter, "AI 解读暂时不可用，请稍后重试");
+        } finally {
+            finished.set(true);
+            complete.run();
         }
     }
 

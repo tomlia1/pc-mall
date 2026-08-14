@@ -19,6 +19,7 @@ const totalProducts = ref(0)
 const hasNextPage = ref(false)
 const chatOpen = ref(false)
 const chatContextProductId = ref<number | null>(null)
+const desktopBuildOpen = ref(false)
 const mobileBuildOpen = ref(false)
 const buildNotice = ref('')
 const buildCheckResult = ref<BuildCheckResult | null>(null)
@@ -127,6 +128,7 @@ function addToBuild(product: Product) {
   if (!isBuildSlot(product.productType)) return
   const previous = selectedBuild[product.productType]
   selectedBuild[product.productType] = product
+  desktopBuildOpen.value = true
   buildNotice.value = previous && previous.id !== product.id ? `已将 ${previous.name} 替换为 ${product.name}` : `已加入 ${product.name}`
 }
 function removeFromBuild(type: BuildSlot) {
@@ -208,6 +210,7 @@ function applyBudgetBuild(candidate: BudgetBuildCandidate) {
   candidate.products.forEach(product => {
     if (isBuildSlot(product.productType)) selectedBuild[product.productType] = product
   })
+  desktopBuildOpen.value = true
   buildNotice.value = '已按后端预算方案填入装机单，正在运行基础检查。'
   void runBuildCheck()
 }
@@ -235,6 +238,7 @@ onBeforeUnmount(() => window.removeEventListener('popstate', syncRoute))
           <input id="product-search" v-model="filters.keyword" maxlength="64" placeholder="搜索商品、CPU 或显卡" />
           <button type="submit">搜索</button>
         </form>
+        <button type="button" class="desktop-build-toggle" :aria-expanded="desktopBuildOpen" @click="desktopBuildOpen = !desktopBuildOpen"><span>我的装机单</span><strong>{{ 7 - missingSlots.length }}/7</strong></button>
       </div>
     </header>
 
@@ -251,7 +255,7 @@ onBeforeUnmount(() => window.removeEventListener('popstate', syncRoute))
         </div>
       </section>
 
-      <section class="catalog-layout" aria-label="商品目录">
+      <section class="catalog-layout" :class="{ 'has-desktop-build': desktopBuildOpen }" aria-label="商品目录">
         <form class="filter-panel" @submit.prevent="submitFilters">
           <div class="filter-heading"><h2>筛选商品</h2><button type="button" @click="clearFilters">清除条件</button></div>
           <label>价格区间
@@ -271,7 +275,7 @@ onBeforeUnmount(() => window.removeEventListener('popstate', syncRoute))
           <div v-else class="empty-state"><h2>没有找到匹配商品</h2><p>试试放宽价格范围，或清除部分筛选条件。</p><button type="button" class="outline-button" @click="clearFilters">查看全部商品</button></div>
           <nav class="pagination" aria-label="商品分页"><button type="button" :disabled="page === 1 || loading" @click="previousPage">上一页</button><span>第 {{ page }} / 共 {{ totalPages }} 页</span><button type="button" :disabled="!hasNextPage || loading" @click="nextPage">下一页</button></nav>
         </section>
-        <BuildListPanel class="build-desktop" :selected="selectedBuild" :total-price="buildTotal" :missing-slots="missingSlots" :check-result="buildCheckResult" :checking="checkingBuild" :check-error="buildCheckError" :analysis-text="buildAnalysisText" :analysis-products="buildAnalysisProducts" :analysis-error="buildAnalysisError" :analyzing="analyzingBuild" @remove="removeFromBuild" @check="runBuildCheck" @analyze="analyzeBuild" @stop-analysis="stopBuildAnalysis" @replace="replaceWithCandidate" @close="mobileBuildOpen = false" />
+        <BuildListPanel v-if="desktopBuildOpen" class="build-desktop" :selected="selectedBuild" :total-price="buildTotal" :missing-slots="missingSlots" :check-result="buildCheckResult" :checking="checkingBuild" :check-error="buildCheckError" :analysis-text="buildAnalysisText" :analysis-products="buildAnalysisProducts" :analysis-error="buildAnalysisError" :analyzing="analyzingBuild" @remove="removeFromBuild" @check="runBuildCheck" @analyze="analyzeBuild" @stop-analysis="stopBuildAnalysis" @replace="replaceWithCandidate" />
       </section>
     </main>
   </div>

@@ -1,6 +1,8 @@
 package com.pcmall.service.impl;
 
 import com.pcmall.entity.Product;
+import com.pcmall.dto.BuildCheckRequest;
+import com.pcmall.service.BuildAnalysisService;
 import com.pcmall.vo.BuildAnalysisResult;
 import com.pcmall.vo.BuildCheckIssue;
 import com.pcmall.vo.BuildCheckResult;
@@ -8,10 +10,30 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class BuildAnalysisStreamServiceImplTest {
+
+    @Test
+    void invokesCompletionCallbackAfterTheStreamEnds() throws Exception {
+        BuildAnalysisService analysisService = mock(BuildAnalysisService.class);
+        BuildCheckResult check = new BuildCheckResult("INCOMPLETE", List.of("GPU"), List.of(), BigDecimal.ZERO, null, null);
+        when(analysisService.analyze(any())).thenReturn(new BuildAnalysisResult(check, null, List.of(), false));
+        BuildAnalysisStreamServiceImpl service = new BuildAnalysisStreamServiceImpl(analysisService, new com.fasterxml.jackson.databind.ObjectMapper());
+        CountDownLatch completed = new CountDownLatch(1);
+
+        service.stream(new BuildCheckRequest(null, null, null, null, null, null, null), completed::countDown);
+
+        assertTrue(completed.await(2, TimeUnit.SECONDS));
+        service.shutdown();
+    }
 
     @Test
     void incompleteBuildSendsCheckThenCompletionPromptWithoutProducts() {
